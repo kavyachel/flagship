@@ -238,3 +238,14 @@ Start with:
 - /evaluate endpoint
 
 Stop after Phase 1 and wait for confirmation before proceeding.
+
+
+Important Commits:
+Suggested commit message:
+  Initial project setup with Express + TypeScript
+
+  - Configure Node.js backend with TypeScript strict mode
+  - Add PostgreSQL schema for feature_flags table
+  - Set up Docker Compose for local database
+  - Add error handling middleware and logging
+  - Create project structure and README

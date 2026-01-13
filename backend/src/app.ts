@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import cors from 'cors';
 import { errorHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
+import featureFlagRoutes from './routes/featureFlagRoutes.js';
 
 export function createApp(): Application {
   const app = express();
@@ -30,9 +31,8 @@ export function createApp(): Application {
     });
   });
 
-  // API routes will be added here
-  // app.use('/api/v1/flags', flagRoutes);
-  // app.use('/api/v1/evaluate', evaluateRoutes);
+  // API routes
+  app.use('/api/v1/flags', featureFlagRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {
