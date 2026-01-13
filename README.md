@@ -167,29 +167,5 @@ DELETE /api/v1/flags/:id
 ```bash
 POST /api/v1/flags/:id/toggle
 ```
-
----
-
-### why SHA-256?
-
-- cryptographic hash ensures uniform distribution
-- no patterns or clustering in bucket assignment
-- industry standard, well-tested algorithm
-
----
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 3000 | Server port |
-| `NODE_ENV` | development | Environment mode |
-| `DB_HOST` | localhost | PostgreSQL host |
-| `DB_PORT` | 5432 | PostgreSQL port |
-| `DB_NAME` | flagship | Database name |
-| `DB_USER` | flagship | Database user |
-| `DB_PASSWORD` | flagship_dev | Database password |
-| `LOG_LEVEL` | info | Logging level |
-
 ---
 
