@@ -172,9 +172,9 @@ POST /api/v1/flags/:id/toggle
 
 ### why SHA-256?
 
-- Cryptographic hash ensures uniform distribution
-- No patterns or clustering in bucket assignment
-- Industry standard, well-tested algorithm
+- cryptographic hash ensures uniform distribution
+- no patterns or clustering in bucket assignment
+- industry standard, well-tested algorithm
 
 ---
 
