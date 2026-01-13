@@ -249,3 +249,19 @@ Suggested commit message:
   - Set up Docker Compose for local database
   - Add error handling middleware and logging
   - Create project structure and README
+
+  Add deterministic flag evaluation with hashing
+
+  - Implement SHA-256 based deterministic bucketing
+  - Create /evaluate endpoint for single flag evaluation
+  - Add batch and evaluate-all endpoints
+  - Include 15 unit tests verifying hash properties
+  - Fail-safe behavior returns disabled on errors
+
+  Add deterministic flag evaluation with hashing
+
+  - Implement SHA-256 based deterministic bucketing
+  - Create /evaluate endpoint for single flag evaluation
+  - Add batch and evaluate-all endpoints
+  - Include 15 unit tests verifying hash properties
+  - Fail-safe behavior returns disabled on errors
