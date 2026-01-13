@@ -274,3 +274,11 @@ Suggested commit message:
   - Add toggle, rollout slider, and environment badge components
   - Build create flag modal with form validation
   - Set up API client with Vite proxy for development
+
+  Add experiments UI to frontend
+
+  - Create experiment types and API client methods
+  - Build experiments page with tab navigation
+  - Implement create experiment modal with variant weights
+  - Add experiment list with start/stop/delete actions
+  - Display experiment metrics with conversion rates

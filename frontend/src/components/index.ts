@@ -4,3 +4,7 @@ export { CreateFlagModal } from './CreateFlagModal';
 export { Toggle } from './Toggle';
 export { EnvironmentBadge } from './EnvironmentBadge';
 export { RolloutSlider } from './RolloutSlider';
+export { ExperimentsPage } from './ExperimentsPage';
+export { ExperimentList } from './ExperimentList';
+export { CreateExperimentModal } from './CreateExperimentModal';
+export { ExperimentStatusBadge } from './ExperimentStatusBadge';

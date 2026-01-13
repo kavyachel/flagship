@@ -5,6 +5,11 @@ import type {
   ApiResponse,
   Environment,
 } from '../types/featureFlag';
+import type {
+  Experiment,
+  CreateExperimentDTO,
+  ExperimentMetrics,
+} from '../types/experiment';
 
 // In development, Vite proxies /api to localhost:3000
 // In production, set VITE_API_URL to the backend URL
@@ -76,6 +81,53 @@ class ApiClient {
     const response = await this.request<ApiResponse<FeatureFlag>>(`/flags/${id}/toggle`, {
       method: 'POST',
     });
+    return response.data;
+  }
+
+  // Experiments
+  async getExperiments(flagId?: string): Promise<Experiment[]> {
+    const query = flagId ? `?flagId=${flagId}` : '';
+    const response = await this.request<ApiResponse<Experiment[]>>(`/experiments${query}`);
+    return response.data;
+  }
+
+  async getExperiment(id: string): Promise<Experiment> {
+    const response = await this.request<ApiResponse<Experiment>>(`/experiments/${id}`);
+    return response.data;
+  }
+
+  async createExperiment(dto: CreateExperimentDTO): Promise<Experiment> {
+    const response = await this.request<ApiResponse<Experiment>>('/experiments', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+    return response.data;
+  }
+
+  async startExperiment(id: string): Promise<Experiment> {
+    const response = await this.request<ApiResponse<Experiment>>(`/experiments/${id}/start`, {
+      method: 'POST',
+    });
+    return response.data;
+  }
+
+  async stopExperiment(id: string): Promise<Experiment> {
+    const response = await this.request<ApiResponse<Experiment>>(`/experiments/${id}/stop`, {
+      method: 'POST',
+    });
+    return response.data;
+  }
+
+  async deleteExperiment(id: string): Promise<void> {
+    await this.request(`/experiments/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getExperimentMetrics(experimentId: string, eventType = 'conversion'): Promise<ExperimentMetrics> {
+    const response = await this.request<ApiResponse<ExperimentMetrics>>(
+      `/events/metrics/${experimentId}?eventType=${eventType}`
+    );
     return response.data;
   }
 }
