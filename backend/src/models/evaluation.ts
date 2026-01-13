@@ -17,6 +17,8 @@ export interface EvaluationResponse {
   flagKey: string;
   enabled: boolean;
   variant: string | null;
+  experimentId?: string;
+  variantId?: string;
   reason: EvaluationReason;
   evaluatedAt: string;
 }

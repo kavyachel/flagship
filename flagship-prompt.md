@@ -265,3 +265,12 @@ Suggested commit message:
   - Add batch and evaluate-all endpoints
   - Include 15 unit tests verifying hash properties
   - Fail-safe behavior returns disabled on errors
+
+   Add React admin UI for feature flags
+
+  - Scaffold React + TypeScript + Vite frontend
+  - Implement Tailwind CSS styling
+  - Create flag list view with table layout
+  - Add toggle, rollout slider, and environment badge components
+  - Build create flag modal with form validation
+  - Set up API client with Vite proxy for development

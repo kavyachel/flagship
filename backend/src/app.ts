@@ -5,6 +5,8 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
 import featureFlagRoutes from './routes/featureFlagRoutes.js';
 import evaluationRoutes from './routes/evaluationRoutes.js';
+import experimentRoutes from './routes/experimentRoutes.js';
+import eventRoutes from './routes/eventRoutes.js';
 
 export function createApp(): Application {
   const app = express();
@@ -35,6 +37,8 @@ export function createApp(): Application {
   // API routes
   app.use('/api/v1/flags', featureFlagRoutes);
   app.use('/api/v1/evaluate', evaluationRoutes);
+  app.use('/api/v1/experiments', experimentRoutes);
+  app.use('/api/v1/events', eventRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {

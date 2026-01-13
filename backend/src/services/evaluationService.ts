@@ -6,7 +6,8 @@ import {
   createDefaultResponse,
 } from '../models/evaluation.js';
 import { featureFlagRepository } from '../repositories/featureFlagRepository.js';
-import { isInRollout } from '../utils/hashing.js';
+import { experimentRepository } from '../repositories/experimentRepository.js';
+import { isInRollout, assignVariant } from '../utils/hashing.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -27,12 +28,13 @@ export class EvaluationService {
    * 2. If not found → return disabled (fail-safe)
    * 3. If disabled → return disabled
    * 4. If enabled:
-   *    a. 100% rollout → return enabled
-   *    b. 0% rollout → return disabled
-   *    c. Otherwise → hash(userId + flagKey) % 100 < rollout_percentage
+   *    a. Check for running experiment → assign variant deterministically
+   *    b. 100% rollout → return enabled
+   *    c. 0% rollout → return disabled
+   *    d. Otherwise → hash(userId + flagKey) % 100 < rollout_percentage
    *
    * @param request - The evaluation request containing flagKey, userId, environment
-   * @returns EvaluationResponse with enabled status and reason
+   * @returns EvaluationResponse with enabled status, variant, and reason
    */
   async evaluate(request: EvaluationRequest): Promise<EvaluationResponse> {
     const startTime = Date.now();
@@ -52,30 +54,58 @@ export class EvaluationService {
       // Flag is disabled
       if (!flag.enabled) {
         logger.debug('Flag is disabled', { flagKey });
-        return this.createResponse(flagKey, false, 'FLAG_DISABLED');
+        return this.createResponse(flagKey, false, null, null, 'FLAG_DISABLED');
       }
 
       // Flag is enabled - check rollout percentage
       const { rolloutPercentage } = flag;
 
-      // 100% rollout - everyone gets it
-      if (rolloutPercentage >= 100) {
-        return this.createResponse(flagKey, true, 'FLAG_ENABLED_FULL_ROLLOUT');
-      }
-
       // 0% rollout - no one gets it
       if (rolloutPercentage <= 0) {
-        return this.createResponse(flagKey, false, 'FLAG_ENABLED_NOT_IN_ROLLOUT');
+        return this.createResponse(flagKey, false, null, null, 'FLAG_ENABLED_NOT_IN_ROLLOUT');
       }
 
-      // Partial rollout - use deterministic hash
-      const inRollout = isInRollout(userId, flagKey, rolloutPercentage);
+      // Check if user is in rollout
+      const inRollout = rolloutPercentage >= 100 || isInRollout(userId, flagKey, rolloutPercentage);
 
-      if (inRollout) {
-        return this.createResponse(flagKey, true, 'FLAG_ENABLED_IN_ROLLOUT');
-      } else {
-        return this.createResponse(flagKey, false, 'FLAG_ENABLED_NOT_IN_ROLLOUT');
+      if (!inRollout) {
+        return this.createResponse(flagKey, false, null, null, 'FLAG_ENABLED_NOT_IN_ROLLOUT');
       }
+
+      // User is in rollout - check for running experiment
+      const experiment = await experimentRepository.findRunningByFlagId(flag.id);
+
+      if (experiment && experiment.variants.length > 0) {
+        // Assign variant deterministically
+        const assignedVariant = assignVariant(
+          userId,
+          experiment.id,
+          experiment.variants
+        );
+
+        if (assignedVariant) {
+          const reason: EvaluationReason =
+            rolloutPercentage >= 100
+              ? 'FLAG_ENABLED_FULL_ROLLOUT'
+              : 'FLAG_ENABLED_IN_ROLLOUT';
+
+          return this.createResponse(
+            flagKey,
+            true,
+            assignedVariant.name,
+            { experimentId: experiment.id, variantId: assignedVariant.id },
+            reason
+          );
+        }
+      }
+
+      // No experiment or variant assignment failed - return enabled without variant
+      const reason: EvaluationReason =
+        rolloutPercentage >= 100
+          ? 'FLAG_ENABLED_FULL_ROLLOUT'
+          : 'FLAG_ENABLED_IN_ROLLOUT';
+
+      return this.createResponse(flagKey, true, null, null, reason);
     } catch (error) {
       logger.error('Evaluation error', { error, request });
       return createDefaultResponse(request.flagKey, 'ERROR');
@@ -134,12 +164,16 @@ export class EvaluationService {
   private createResponse(
     flagKey: string,
     enabled: boolean,
+    variant: string | null,
+    assignment: { experimentId: string; variantId: string } | null,
     reason: EvaluationReason
   ): EvaluationResponse {
     return {
       flagKey,
       enabled,
-      variant: null, // Will be used when experiments are implemented
+      variant,
+      experimentId: assignment?.experimentId ?? undefined,
+      variantId: assignment?.variantId ?? undefined,
       reason,
       evaluatedAt: new Date().toISOString(),
     };
