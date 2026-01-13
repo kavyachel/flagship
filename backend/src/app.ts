@@ -4,6 +4,7 @@ import cors from 'cors';
 import { errorHandler } from './middleware/errorHandler.js';
 import { logger } from './utils/logger.js';
 import featureFlagRoutes from './routes/featureFlagRoutes.js';
+import evaluationRoutes from './routes/evaluationRoutes.js';
 
 export function createApp(): Application {
   const app = express();
@@ -33,6 +34,7 @@ export function createApp(): Application {
 
   // API routes
   app.use('/api/v1/flags', featureFlagRoutes);
+  app.use('/api/v1/evaluate', evaluationRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {
