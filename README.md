@@ -56,7 +56,7 @@ it's pretty straightforward. we take a request, do some quick math, and tell you
 - Docker and Docker Compose
 - Git
 
-### Quick Start
+### quick start
 
 ```bash
 # 1. Clone the repository
@@ -99,7 +99,7 @@ Response:
 
 ---
 
-#### Create a Flag
+#### create a flag
 
 ```bash
 POST /api/v1/flags
@@ -131,20 +131,20 @@ Response:
 }
 ```
 
-#### List All Flags
+#### list all flags
 
 ```bash
 GET /api/v1/flags
 GET /api/v1/flags?environment=prod
 ```
 
-#### Get Flag by ID
+#### get flag by id
 
 ```bash
 GET /api/v1/flags/:id
 ```
 
-#### Update a Flag
+#### update a flag
 
 ```bash
 PUT /api/v1/flags/:id
@@ -156,236 +156,16 @@ Content-Type: application/json
 }
 ```
 
-#### Delete a Flag
+#### delete a flag
 
 ```bash
 DELETE /api/v1/flags/:id
 ```
 
-#### Toggle a Flag
+#### toggle a flag
 
 ```bash
 POST /api/v1/flags/:id/toggle
 ```
 
 ---
-
-### Flag Evaluation (Hot Path)
-
-#### Evaluate Single Flag
-
-```bash
-GET /api/v1/evaluate?flagKey=checkout_redesign&userId=user_123&environment=staging
-```
-
-Response:
-```json
-{
-  "flagKey": "checkout_redesign",
-  "enabled": true,
-  "variant": null,
-  "reason": "FLAG_ENABLED_IN_ROLLOUT",
-  "evaluatedAt": "2024-01-15T10:30:00.000Z"
-}
-```
-
-**Evaluation Reasons:**
-| Reason | Description |
-|--------|-------------|
-| `FLAG_ENABLED_FULL_ROLLOUT` | Flag enabled, 100% rollout |
-| `FLAG_ENABLED_IN_ROLLOUT` | Flag enabled, user is in rollout percentage |
-| `FLAG_ENABLED_NOT_IN_ROLLOUT` | Flag enabled, user is outside rollout |
-| `FLAG_DISABLED` | Flag exists but is disabled |
-| `FLAG_NOT_FOUND` | Flag doesn't exist (fail-safe: disabled) |
-| `ERROR` | Evaluation error (fail-safe: disabled) |
-
-#### Batch Evaluation
-
-```bash
-POST /api/v1/evaluate/batch
-Content-Type: application/json
-
-{
-  "flagKeys": ["checkout_redesign", "dark_mode", "new_pricing"],
-  "userId": "user_123",
-  "environment": "staging"
-}
-```
-
-#### Evaluate All Flags
-
-```bash
-GET /api/v1/evaluate/all?userId=user_123&environment=staging
-```
-
----
-
-## Deterministic Assignment
-
-### How It Works
-
-Flagship uses deterministic hashing to ensure consistent user experiences:
-
-```
-bucket = SHA256(userId + ":" + flagKey) % 100
-
-if bucket < rolloutPercentage:
-    user sees feature
-else:
-    user sees control
-```
-
-### Key Properties
-
-1. **Deterministic**: The same user always gets the same result for a given flag
-2. **Uniform**: Users are evenly distributed across buckets (verified by tests)
-3. **Independent**: Changing one flag doesn't affect assignment to other flags
-4. **Monotonic**: If a user is in 30% rollout, they're also in 50% and 70%
-
-### Example
-
-```
-User: "user_123"
-Flag: "checkout_redesign"
-Rollout: 50%
-
-SHA256("user_123:checkout_redesign") → bucket 42
-42 < 50 → User sees the new checkout ✓
-```
-
-### Why SHA-256?
-
-- Cryptographic hash ensures uniform distribution
-- No patterns or clustering in bucket assignment
-- Industry standard, well-tested algorithm
-
----
-
-## Failure Modes & Tradeoffs
-
-### Fail-Safe Behavior
-
-Flagship is designed to fail safely:
-
-| Scenario | Behavior |
-|----------|----------|
-| Flag not found | Returns `enabled: false` |
-| Database error | Returns `enabled: false` |
-| Invalid input | Returns validation error |
-| Service crash | Clients should cache last known state |
-
-### Design Tradeoffs
-
-| Decision | Tradeoff |
-|----------|----------|
-| **Postgres over Redis** | Simpler ops, but slightly higher latency. Redis caching planned for Phase 4. |
-| **Per-request DB lookup** | Always fresh data, but adds ~5-10ms latency. Acceptable for <200ms target. |
-| **No client-side SDK** | Simpler architecture, but requires network call per evaluation. Batch endpoint mitigates this. |
-| **Percentage-based rollout** | Simple and predictable, but no user targeting. Targeting planned for future. |
-
-### Consistency Model
-
-- **Flags**: Strongly consistent (read-after-write)
-- **Evaluations**: Deterministic based on current flag state
-- **Rollout changes**: Take effect immediately (no propagation delay)
-
----
-
-## Project Structure
-
-```
-flagship/
-├── backend/
-│   ├── src/
-│   │   ├── config/           # Environment configuration
-│   │   ├── controllers/      # HTTP request handlers
-│   │   ├── db/               # Database setup & migrations
-│   │   ├── middleware/       # Express middleware
-│   │   ├── models/           # TypeScript types & DTOs
-│   │   ├── repositories/     # Data access layer
-│   │   ├── routes/           # API route definitions
-│   │   ├── services/         # Business logic
-│   │   ├── utils/            # Utilities (hashing, logging)
-│   │   └── __tests__/        # Unit tests
-│   ├── package.json
-│   └── tsconfig.json
-├── frontend/                 # React admin UI (Phase 2)
-├── infra/
-│   └── terraform/            # Infrastructure as code (Phase 4)
-├── scripts/
-│   └── traffic-generator/    # Synthetic load testing (Phase 4)
-├── docker-compose.yml
-└── README.md
-```
-
----
-
-## Development
-
-### Available Scripts
-
-```bash
-# Development server with hot reload
-npm run dev
-
-# Type checking
-npm run typecheck
-
-# Run tests
-npm test
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint code
-npm run lint
-```
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `PORT` | 3000 | Server port |
-| `NODE_ENV` | development | Environment mode |
-| `DB_HOST` | localhost | PostgreSQL host |
-| `DB_PORT` | 5432 | PostgreSQL port |
-| `DB_NAME` | flagship | Database name |
-| `DB_USER` | flagship | Database user |
-| `DB_PASSWORD` | flagship_dev | Database password |
-| `LOG_LEVEL` | info | Logging level |
-
----
-
-## Roadmap
-
-- [x] **Phase 1**: Backend MVP
-  - [x] Project scaffolding
-  - [x] Database schema
-  - [x] FeatureFlag CRUD API
-  - [x] Deterministic flag evaluation
-  - [x] Unit tests for hashing
-
-- [ ] **Phase 2**: Admin UI
-  - [ ] React app scaffold
-  - [ ] Flag list view
-  - [ ] Toggle enable/disable
-  - [ ] Adjust rollout percentage
-
-- [ ] **Phase 3**: Experiments & Events
-  - [ ] Experiment + Variant models
-  - [ ] Deterministic variant assignment
-  - [ ] Event ingestion endpoint
-  - [ ] Basic analytics (conversion rate)
-
-- [ ] **Phase 4**: Infrastructure & Polish
-  - [ ] Terraform for AWS resources
-  - [ ] Deploy backend to ECS
-  - [ ] Redis caching layer
-  - [ ] Synthetic traffic generator
-  - [ ] Performance metrics (p95 latency)
-
----
-
