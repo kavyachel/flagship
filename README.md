@@ -1,18 +1,19 @@
-# Flagship
+# 🚩 flagship
+hey there. this is flagship. it’s a production-grade feature flag and experimentation platform, but without the corporate headache. think launchdarkly or meta's internal tools, but you actually own it.
 
-A production-grade Feature Flag and Experimentation Platform.
+* feature flags with percentage rollouts
 
-## Overview
+* deterministic user assignment 
 
-Flagship is an internal-style feature flag platform (similar to LaunchDarkly or Meta's experimentation infrastructure) that supports:
+* a/b experimentation with variants 
 
-- Feature flags with percentage rollouts
-- Deterministic user assignment
-- A/B experimentation with variants (Phase 2)
-- Event tracking and analytics (Phase 3)
-- Admin UI for configuration (Phase 2)
+* event tracking and analytics
 
-## Architecture
+* fancy admin ui 
+
+🏗️ architecture
+
+it's pretty straightforward. we take a request, do some quick math, and tell your app what to do.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -40,19 +41,17 @@ Flagship is an internal-style feature flag platform (similar to LaunchDarkly or 
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-## Tech Stack
+🛠️ tech stack
 
-| Layer | Technology |
+| layer | technology |
 |-------|------------|
-| Backend | Node.js + TypeScript + Express |
-| Database | PostgreSQL 15 |
-| Frontend | React + TypeScript (Phase 2) |
-| Infrastructure | AWS (ECS/Lambda) + Terraform (Phase 4) |
+| backend | Node.js + TypeScript + Express |
+| database | PostgreSQL 15 |
+| frontend | React + TypeScript (Phase 2) |
+| infrastructure | AWS (ECS/Lambda) + Terraform (Phase 4) |
 
-## Getting Started
-
-### Prerequisites
-
+🚀 getting started
+**prerequisites**
 - Node.js 18+
 - Docker and Docker Compose
 - Git
@@ -81,9 +80,9 @@ npm run dev
 curl http://localhost:3000/health
 ```
 
-## API Reference
+📡 api reference
 
-### Health Check
+### health check
 
 ```bash
 GET /health
@@ -99,8 +98,6 @@ Response:
 ```
 
 ---
-
-### Feature Flags
 
 #### Create a Flag
 
@@ -383,15 +380,12 @@ npm run lint
   - [ ] Event ingestion endpoint
   - [ ] Basic analytics (conversion rate)
 
-- [x] **Phase 4**: Infrastructure & Polish
-  - [x] Terraform for AWS resources
-  - [x] Deploy backend to ECS
-  - [x] Redis caching layer
-  - [x] Synthetic traffic generator
-  - [x] Performance metrics (p95 latency)
+- [ ] **Phase 4**: Infrastructure & Polish
+  - [ ] Terraform for AWS resources
+  - [ ] Deploy backend to ECS
+  - [ ] Redis caching layer
+  - [ ] Synthetic traffic generator
+  - [ ] Performance metrics (p95 latency)
 
 ---
 
-## License
-
-ISC
