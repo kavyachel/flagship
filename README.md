@@ -9,9 +9,11 @@ hey there. this is flagship. it’s a production-grade feature flag and experime
 
 * event tracking and analytics
 
-* fancy admin ui 
+* fancy admin ui
 
-🏗️ architecture
+<img width="1469" height="799" alt="Screenshot 2026-01-13 at 9 06 48 PM" src="https://github.com/user-attachments/assets/f44288ed-eab2-4a2b-ac2e-e7026714f82b" />
+
+## 🏗️ architecture
 
 it's pretty straightforward. we take a request, do some quick math, and tell your app what to do.
 
@@ -41,7 +43,7 @@ it's pretty straightforward. we take a request, do some quick math, and tell you
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-🛠️ tech stack
+## 🛠️ tech stack
 
 | layer | technology |
 |-------|------------|
@@ -50,7 +52,7 @@ it's pretty straightforward. we take a request, do some quick math, and tell you
 | frontend | React + TypeScript (Phase 2) |
 | infrastructure | AWS (ECS/Lambda) + Terraform (Phase 4) |
 
-🚀 getting started
+## 🚀 getting started
 **prerequisites**
 - Node.js 18+
 - Docker and Docker Compose
@@ -80,7 +82,7 @@ npm run dev
 curl http://localhost:3000/health
 ```
 
-📡 api reference
+## 📡 api reference
 
 ### health check
 
