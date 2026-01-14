@@ -1,0 +1,16 @@
+{
+  "name": "flagship-traffic-generator",
+  "version": "1.0.0",
+  "description": "Synthetic traffic generator for Flagship load testing",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "test:light": "node index.js --users 1000 --duration 30",
+    "test:medium": "node index.js --users 10000 --duration 60",
+    "test:heavy": "node index.js --users 50000 --duration 120"
+  },
+  "dependencies": {
+    "commander": "^11.1.0"
+  }
+}

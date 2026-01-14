@@ -2,11 +2,13 @@ import express, { Application, Request, Response } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import { errorHandler } from './middleware/errorHandler.js';
+import { metricsMiddleware } from './middleware/metricsMiddleware.js';
 import { logger } from './utils/logger.js';
 import featureFlagRoutes from './routes/featureFlagRoutes.js';
 import evaluationRoutes from './routes/evaluationRoutes.js';
 import experimentRoutes from './routes/experimentRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
+import metricsRoutes from './routes/metricsRoutes.js';
 
 export function createApp(): Application {
   const app = express();
@@ -25,6 +27,9 @@ export function createApp(): Application {
     next();
   });
 
+  // Metrics collection middleware
+  app.use(metricsMiddleware);
+
   // Health check endpoint
   app.get('/health', (_req: Request, res: Response) => {
     res.json({
@@ -39,6 +44,9 @@ export function createApp(): Application {
   app.use('/api/v1/evaluate', evaluationRoutes);
   app.use('/api/v1/experiments', experimentRoutes);
   app.use('/api/v1/events', eventRoutes);
+
+  // Metrics endpoint
+  app.use('/metrics', metricsRoutes);
 
   // 404 handler
   app.use((_req: Request, res: Response) => {

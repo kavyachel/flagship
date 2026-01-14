@@ -14,6 +14,12 @@ export const config = {
     user: process.env['DB_USER'] ?? 'flagship',
     password: process.env['DB_PASSWORD'] ?? 'flagship_dev',
   },
+  redis: {
+    host: process.env['REDIS_HOST'] ?? 'localhost',
+    port: parseInt(process.env['REDIS_PORT'] ?? '6379', 10),
+    enabled: process.env['REDIS_ENABLED'] !== 'false',
+    ttlSeconds: parseInt(process.env['REDIS_TTL_SECONDS'] ?? '60', 10),
+  },
   logging: {
     level: process.env['LOG_LEVEL'] ?? 'info',
   },

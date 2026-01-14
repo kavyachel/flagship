@@ -8,6 +8,7 @@ import {
   mapRowToFeatureFlag,
 } from '../models/featureFlag.js';
 import { logger } from '../utils/logger.js';
+import { cacheService, CacheKeys } from '../cache/redis.js';
 
 export class FeatureFlagRepository {
   /**
@@ -71,14 +72,31 @@ export class FeatureFlagRepository {
 
   /**
    * Find a feature flag by key and environment
-   * This is the hot path query for flag evaluation
+   * This is the hot path query for flag evaluation - uses caching
    */
   async findByKey(key: string, environment: Environment): Promise<FeatureFlag | null> {
+    const cacheKey = CacheKeys.flag(key, environment);
+
+    // Try cache first
+    const cached = await cacheService.get<FeatureFlag>(cacheKey);
+    if (cached) {
+      logger.debug('Cache hit for flag', { key, environment });
+      return cached;
+    }
+
+    // Cache miss - query database
     const query = 'SELECT * FROM feature_flags WHERE key = $1 AND environment = $2';
     const result = await pool.query<FeatureFlagRow>(query, [key, environment]);
     const row = result.rows[0];
 
-    return row ? mapRowToFeatureFlag(row) : null;
+    if (row) {
+      const flag = mapRowToFeatureFlag(row);
+      // Cache for subsequent requests
+      await cacheService.set(cacheKey, flag);
+      return flag;
+    }
+
+    return null;
   }
 
   /**
@@ -130,19 +148,39 @@ export class FeatureFlagRepository {
     const result = await pool.query<FeatureFlagRow>(query, values);
     const row = result.rows[0];
 
-    return row ? mapRowToFeatureFlag(row) : null;
+    if (row) {
+      const flag = mapRowToFeatureFlag(row);
+      // Invalidate cache for this flag
+      await cacheService.delete(CacheKeys.flag(flag.key, flag.environment));
+      await cacheService.delete(CacheKeys.flagById(flag.id));
+      await cacheService.deletePattern('flags:*');
+      return flag;
+    }
+
+    return null;
   }
 
   /**
    * Delete a feature flag
    */
   async delete(id: string): Promise<boolean> {
+    // Get flag first to invalidate correct cache keys
+    const flag = await this.findById(id);
+
     const query = 'DELETE FROM feature_flags WHERE id = $1';
     const result = await pool.query(query, [id]);
 
-    logger.debug('Deleted feature flag', { id, deleted: result.rowCount === 1 });
+    const deleted = result.rowCount === 1;
+    logger.debug('Deleted feature flag', { id, deleted });
 
-    return result.rowCount === 1;
+    if (deleted && flag) {
+      // Invalidate cache
+      await cacheService.delete(CacheKeys.flag(flag.key, flag.environment));
+      await cacheService.delete(CacheKeys.flagById(flag.id));
+      await cacheService.deletePattern('flags:*');
+    }
+
+    return deleted;
   }
 
   /**

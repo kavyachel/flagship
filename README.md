@@ -383,12 +383,12 @@ npm run lint
   - [ ] Event ingestion endpoint
   - [ ] Basic analytics (conversion rate)
 
-- [ ] **Phase 4**: Infrastructure & Polish
-  - [ ] Terraform for AWS resources
-  - [ ] Deploy backend to ECS
-  - [ ] Redis caching layer
-  - [ ] Synthetic traffic generator
-  - [ ] Performance metrics (p95 latency)
+- [x] **Phase 4**: Infrastructure & Polish
+  - [x] Terraform for AWS resources
+  - [x] Deploy backend to ECS
+  - [x] Redis caching layer
+  - [x] Synthetic traffic generator
+  - [x] Performance metrics (p95 latency)
 
 ---
 
