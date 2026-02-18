@@ -1,5 +1,5 @@
 # 🚩 flagship
-hey there. this is flagship. it’s a production-grade feature flag and experimentation platform, but without the corporate headache. think launchdarkly or meta's internal tools, but you actually own it.
+hey there. this is flagship. it’s a production-grade feature flag and experimentation platform, but without the corporate headache.
 
 * feature flags with percentage rollouts
 
